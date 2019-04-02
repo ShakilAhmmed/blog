@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from .models import BlogPost
 
 
 # Create your views here.
@@ -38,12 +39,22 @@ def home(request):
 
 @login_required
 def post_list(request):
-    return render(request, 'dashboard/post_list.html')
+    all_post=BlogPost.objects.all()
+    context={
+        'all_post':all_post
+    }
+    return render(request, 'dashboard/post_list.html',context)
 
 
 @login_required
 def create_post(request):
-    return render(request, 'dashboard/create_post.html')
+    if request.method == "POST":
+        title = request.POST.get('post_title', None)
+        description = request.POST.get('post_description', None)
+        BlogPost.objects.create(title=title, details=description)
+        return HttpResponseRedirect(reverse('post_list'))
+    elif request.method == "GET":
+        return render(request, 'dashboard/create_post.html')
 
 
 @login_required
